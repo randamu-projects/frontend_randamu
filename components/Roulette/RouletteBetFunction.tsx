@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { WriteOnlyFunctionForm } from "../../app/debug/_components/contract/WriteOnlyFunctionForm";
 import deployedContracts from "../../contracts/deployedContracts";
-import { ethers } from "ethers";
 import { Address } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { randamu } from "~~/randmu";
@@ -23,7 +22,7 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
   const betFunctionABI = rouletteContractABI.find(fn => fn.type === "function" && fn.name === "bet");
   const approveFunctionABI = tokenContractABI.find(fn => fn.type === "function" && fn.name === "approve");
 
-  const [needsApproval, setNeedsApproval] = useState(false);
+  const [needsApproval, setNeedsApproval] = useState(true);
 
   const { data: allowanceData } = useReadContract({
     address: tokenContractAddress,
@@ -32,6 +31,8 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     chainId: randamu.id,
     args: [userAddress || "", rouletteContractAddress],
   });
+
+  console.log("Allowance: ", allowanceData);
 
   const initialFormValuesBet = {
     guessValue: BigInt(probability),
@@ -43,14 +44,18 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     _value: amount,
   };
 
+  console.log("Approve args: ", initialFormValuesApprove);
+  console.log("Bet args: ", initialFormValuesBet);
+  console.log("Numero: ", BigInt(amount));
+
   useEffect(() => {
-    const betAmountBigInt = BigInt(amount || "0");
-    if (allowanceData && betAmountBigInt > allowanceData) {
+    const betAmountBigInt = BigInt(amount);
+    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
       setNeedsApproval(true);
     } else {
       setNeedsApproval(false);
     }
-  }, [allowanceData, amount, needsApproval]);
+  }, [allowanceData, amount]);
 
   if (!betFunctionABI || !approveFunctionABI) {
     return <div>Required functions are not found in the contract ABI.</div>;
