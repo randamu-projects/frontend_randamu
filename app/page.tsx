@@ -1,17 +1,7 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import HomeScreen from "~~/components/HomeScreen";
+import Start from "./Start";
 
-const HomePage: React.FC = () => {
-  const router = useRouter();
-
-  const handleGameSelect = (game: string) => {
-    router.push(`/${game}`);
-  };
-
-  return <HomeScreen onGameSelect={handleGameSelect} />;
-};
-
-export default HomePage;
+export default function Home() {
+  return <Start />;
+}

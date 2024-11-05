@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     DumbERC20: {
-      address: "0x02Ca45e5e495df84Fd2d6246fbe2Cd51723f8F1f",
+      address: "0x679878C9a4656dCB66b601C0F2463d9a49e91C36",
       abi: [
         {
           type: "constructor",
@@ -326,7 +326,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roulette: {
-      address: "0x272Fd7B85D8E7a02341E9e2a7A98a90a30C3526b",
+      address: "0x5aFbC6EfeE1c2452C0451d1508F3FF25d6789AF7",
       abi: [
         {
           type: "constructor",
@@ -668,6 +668,380 @@ const deployedContracts = {
       ],
       inheritedFunctions: {},
     },
+  },
+  Blackjack: {
+    address: "0xA15BB66138824a1c7167f5E85b957d04Dd34E468",
+    abi: [
+      {
+        type: "constructor",
+        inputs: [
+          {
+            name: "token_",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "_randomnessRequester",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "adminDeposit",
+        inputs: [
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "adminWithdraw",
+        inputs: [
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "computeGameId",
+        inputs: [
+          {
+            name: "user",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "nonce",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        outputs: [
+          {
+            name: "",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+        stateMutability: "pure",
+      },
+      {
+        type: "function",
+        name: "computePoints",
+        inputs: [
+          {
+            name: "gameId",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+          {
+            name: "actor",
+            type: "uint8",
+            internalType: "enum IBlackjack.Actor",
+          },
+        ],
+        outputs: [
+          {
+            name: "",
+            type: "uint8",
+            internalType: "uint8",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "dealerFunds",
+        inputs: [],
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "executeAction",
+        inputs: [
+          {
+            name: "gameNonce",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "action",
+            type: "uint8",
+            internalType: "enum IBlackjack.Action",
+          },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "games",
+        inputs: [
+          {
+            name: "",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+        outputs: [
+          {
+            name: "user",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "stakeAmount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "gameState",
+            type: "uint8",
+            internalType: "enum IBlackjack.State",
+          },
+          {
+            name: "gameCards",
+            type: "tuple",
+            internalType: "struct IBlackjack.Cards",
+            components: [
+              {
+                name: "dealerCards",
+                type: "uint8[]",
+                internalType: "uint8[]",
+              },
+              {
+                name: "userCards",
+                type: "uint8[]",
+                internalType: "uint8[]",
+              },
+            ],
+          },
+          {
+            name: "lastAction",
+            type: "uint8",
+            internalType: "enum IBlackjack.Action",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "initiateGame",
+        inputs: [
+          {
+            name: "userStake",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        outputs: [
+          {
+            name: "nonce",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "lockedBalance",
+        inputs: [
+          {
+            name: "",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "nonces",
+        inputs: [
+          {
+            name: "",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        outputs: [
+          {
+            name: "",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "owner",
+        inputs: [],
+        outputs: [
+          {
+            name: "",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "receiveRandomness",
+        inputs: [
+          {
+            name: "requestID",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "randomness",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "renounceOwnership",
+        inputs: [],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "function",
+        name: "requestIdToGameId",
+        inputs: [
+          {
+            name: "",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+        outputs: [
+          {
+            name: "",
+            type: "bytes32",
+            internalType: "bytes32",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "token",
+        inputs: [],
+        outputs: [
+          {
+            name: "",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        stateMutability: "view",
+      },
+      {
+        type: "function",
+        name: "transferOwnership",
+        inputs: [
+          {
+            name: "newOwner",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+        outputs: [],
+        stateMutability: "nonpayable",
+      },
+      {
+        type: "event",
+        name: "OwnershipTransferred",
+        inputs: [
+          {
+            name: "previousOwner",
+            type: "address",
+            indexed: true,
+            internalType: "address",
+          },
+          {
+            name: "newOwner",
+            type: "address",
+            indexed: true,
+            internalType: "address",
+          },
+        ],
+        anonymous: false,
+      },
+      {
+        type: "error",
+        name: "InsufficientDealerBalance",
+        inputs: [],
+      },
+      {
+        type: "error",
+        name: "InvalidActor",
+        inputs: [],
+      },
+      {
+        type: "error",
+        name: "NotUserTurn",
+        inputs: [],
+      },
+      {
+        type: "error",
+        name: "OwnableInvalidOwner",
+        inputs: [
+          {
+            name: "owner",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+      },
+      {
+        type: "error",
+        name: "OwnableUnauthorizedAccount",
+        inputs: [
+          {
+            name: "account",
+            type: "address",
+            internalType: "address",
+          },
+        ],
+      },
+    ],
+    inheritedFunctions: {},
   },
 } as const;
 

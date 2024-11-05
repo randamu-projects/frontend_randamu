@@ -1,13 +1,20 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-interface HomeScreenProps {
-  onGameSelect: (game: string) => void;
-}
+const CasinoScreen: React.FC = () => {
+  const router = useRouter();
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ onGameSelect }) => {
+  const onGameSelect = (game: string) => {
+    if (game === "BlackJack") {
+      router.push("/Casino/BlackJack");
+    } else if (game === "Roulette") {
+      router.push("/Casino/Roulette");
+    }
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.connectKitContainer}>
@@ -85,4 +92,4 @@ const styles = {
   },
 };
 
-export default HomeScreen;
+export default CasinoScreen;
