@@ -106,7 +106,7 @@ const styles: { [key: string]: CSSProperties } = {
     alignItems: "center",
     minHeight: "100vh",
     padding: "20px",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "lightgray",
   },
   title: {
     fontSize: "48px",
