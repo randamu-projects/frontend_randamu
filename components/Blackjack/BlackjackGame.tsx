@@ -8,11 +8,42 @@ import { styles } from "../../styles/BlackJackGameStyles";
 import { calculateTotal, createDeck } from "../../utils/cardUtils";
 import Hand from "../Blackjack/Hand";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { set } from "nprogress";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { useReadContract } from "wagmi";
 import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
 import { randamu } from "~~/randmu";
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
 
 // BlackjackGame.tsx
 
@@ -100,7 +131,7 @@ const BlackjackGame: React.FC = () => {
   const [bet, setBet] = useState<string>("");
   const [playerTotal, setPlayerTotal] = useState(0);
   const [dealerTotal, setDealerTotal] = useState(0);
-  const [isDealerDrawing, setIsDealerDrawing] = useState(false);
+  const [, setIsDealerDrawing] = useState(false);
 
   const { address: userAddress } = useAccount();
   const blackJackContractInfo = deployedContracts[31337].Blackjack;
@@ -139,6 +170,19 @@ const BlackjackGame: React.FC = () => {
     args: [userAddress || ""],
   });
 
+  console.log("Allowance: ", allowanceData);
+
+  useEffect(() => {
+    const betAmountBigInt = BigInt(bet) * BigInt(10 ** 18);
+    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
+      setNeedsApproval(true);
+    } else {
+      setNeedsApproval(false);
+    }
+  }, [allowanceData, bet]);
+
+  console.log("bet: ", BigInt(bet) * BigInt(10 ** 18));
+
   const initialFormValuesHit = {
     gameNonce: userNonce,
     action: 0,
@@ -149,14 +193,7 @@ const BlackjackGame: React.FC = () => {
     action: 1,
   };
 
-  useEffect(() => {
-    const betAmountBigInt = BigInt(bet);
-    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
-      setNeedsApproval(true);
-    } else {
-      setNeedsApproval(false);
-    }
-  }, [allowanceData, bet]);
+  console.log(needsApproval);
 
   const val = parseFloat(bet);
   useEffect(() => {
@@ -360,7 +397,7 @@ const BlackjackGame: React.FC = () => {
                   initialFormValues={initialFormValuesApprove}
                   hideFunctionInputs={true}
                   onChange={() => {
-                    //
+                    setNeedsApproval(false);
                   }}
                 />
               </>
