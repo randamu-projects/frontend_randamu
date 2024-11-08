@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     DumbERC20: {
-      address: "0x679878C9a4656dCB66b601C0F2463d9a49e91C36",
+      address: "0x5586e9790807Aa8C285C27FDd97753629b98963b",
       abi: [
         {
           type: "constructor",
@@ -326,7 +326,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roulette: {
-      address: "0x5aFbC6EfeE1c2452C0451d1508F3FF25d6789AF7",
+      address: "0x42DaF378D5Fa6Fd4a5225990eee43728A0053eA7",
       abi: [
         {
           type: "constructor",
@@ -669,7 +669,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Blackjack: {
-      address: "0xA15BB66138824a1c7167f5E85b957d04Dd34E468",
+      address: "0xD60e6CbBe7eEE1C2Ab326dDA75efCcF5385cD14B",
       abi: [
         {
           type: "constructor",
@@ -1042,6 +1042,104 @@ const deployedContracts = {
       ],
       inheritedFunctions: {},
     },
+    ThreeBay: {
+      address: "0xYourContractAddressHere", // Replace with your actual contract address
+      abi: [
+        // Paste the ABI array here
+        {
+          type: "function",
+          name: "createAuction",
+          inputs: [
+            { name: "nftAddress", type: "address", internalType: "address" },
+            { name: "nftId", type: "uint256", internalType: "uint256" },
+            { name: "startTime", type: "uint256", internalType: "uint256" },
+            { name: "endTime", type: "uint256", internalType: "uint256" },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "bid",
+          inputs: [
+            { name: "auctionId", type: "bytes32", internalType: "bytes32" },
+            { name: "encryptedPrice", type: "bytes", internalType: "bytes" },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "claimProceeds",
+          inputs: [{ name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "claimNft",
+          inputs: [{ name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "bidsAmount",
+          inputs: [{ name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "computeAuctionId",
+          inputs: [
+            { name: "seller", type: "address", internalType: "address" },
+            { name: "nftAddress", type: "address", internalType: "address" },
+            { name: "nftId", type: "uint256", internalType: "uint256" },
+            { name: "nonce", type: "uint256", internalType: "uint256" },
+          ],
+          outputs: [{ name: "", type: "bytes32", internalType: "bytes32" }],
+          stateMutability: "pure",
+        },
+        {
+          type: "event",
+          name: "AuctionCreated",
+          inputs: [{ indexed: false, name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "NoBid",
+          inputs: [{ indexed: false, name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "BidsRevealed",
+          inputs: [{ indexed: false, name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ClaimedProceeds",
+          inputs: [{ indexed: false, name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ClaimedNft",
+          inputs: [{ indexed: false, name: "auctionId", type: "bytes32", internalType: "bytes32" }],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "AlreadyClaimed",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+    },
+    // ... other contracts
   },
 } as const;
 

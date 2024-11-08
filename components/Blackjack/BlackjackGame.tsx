@@ -3,124 +3,18 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import deployedContracts from "../../contracts/deployedContracts";
 import { styles } from "../../styles/BlackJackGameStyles";
 import { calculateTotal, createDeck } from "../../utils/cardUtils";
 import Hand from "../Blackjack/Hand";
+import BlackjackGameInt from "./BlackjackGameInt";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { set } from "nprogress";
-import { Address } from "viem";
-import { useAccount } from "wagmi";
-import { useReadContract } from "wagmi";
-import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
-import { randamu } from "~~/randmu";
 
 // BlackjackGame.tsx
 
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
-
-// BlackjackGame.tsx
+// Import the BlackjackGameInt component
 
 const BlackjackGame: React.FC = () => {
   const router = useRouter();
-  const { isConnected } = useAccount();
-
   const [deck, setDeck] = useState(createDeck());
   const [playerHand, setPlayerHand] = useState<{ value: string; suit: string }[]>([]);
   const [dealerHand, setDealerHand] = useState<{ value: string; suit: string }[]>([]);
@@ -133,69 +27,8 @@ const BlackjackGame: React.FC = () => {
   const [dealerTotal, setDealerTotal] = useState(0);
   const [, setIsDealerDrawing] = useState(false);
 
-  const { address: userAddress } = useAccount();
-  const blackJackContractInfo = deployedContracts[31337].Blackjack;
-  const tokenContractInfo = deployedContracts[31337].DumbERC20;
-  const blackJackContractAddress = blackJackContractInfo.address as Address;
-  const blackJackContractABI = blackJackContractInfo.abi;
-  const tokenContractAddress = tokenContractInfo.address as Address;
-  const tokenContractABI = tokenContractInfo.abi;
-  const approveABI = tokenContractABI.find(fn => fn.type === "function" && fn.name === "approve");
-  const initiateGameABI = blackJackContractABI.find(fn => fn.type === "function" && fn.name === "initiateGame");
-  const executeActionABI = blackJackContractABI.find(fn => fn.type === "function" && fn.name === "executeAction");
-
-  const [needsApproval, setNeedsApproval] = useState(true);
-
-  const initialFormValuesApprove = {
-    _spender: blackJackContractAddress,
-    _value: BigInt(bet) * BigInt(10 ** 18),
-  };
-
-  const initialFormValuesInitiate = {
-    _betAmount: BigInt(bet) * BigInt(10 ** 18),
-  };
-  const { data: allowanceData } = useReadContract({
-    address: tokenContractAddress,
-    abi: tokenContractABI,
-    functionName: "allowance",
-    chainId: randamu.id,
-    args: [userAddress || "", blackJackContractAddress],
-  });
-
-  const { data: userNonce } = useReadContract({
-    address: blackJackContractAddress,
-    abi: blackJackContractABI,
-    functionName: "nonces",
-    chainId: randamu.id,
-    args: [userAddress || ""],
-  });
-
-  console.log("Allowance: ", allowanceData);
-
-  useEffect(() => {
-    const betAmountBigInt = BigInt(bet) * BigInt(10 ** 18);
-    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
-      setNeedsApproval(true);
-    } else {
-      setNeedsApproval(false);
-    }
-  }, [allowanceData, bet]);
-
-  console.log("bet: ", BigInt(bet) * BigInt(10 ** 18));
-
-  const initialFormValuesHit = {
-    gameNonce: userNonce,
-    action: 0,
-  };
-
-  const initialFormValuesStand = {
-    gameNonce: userNonce,
-    action: 1,
-  };
-
-  console.log(needsApproval);
-
   const val = parseFloat(bet);
+
   useEffect(() => {
     setPlayerTotal(calculateTotal(playerHand));
   }, [playerHand]);
@@ -372,53 +205,9 @@ const BlackjackGame: React.FC = () => {
         )}
       </div>
 
-      {/* <button
-            style={{
-              ...styles.startButton,
-              backgroundColor: isConnected ? "#4CAF50" : "#808080",
-              cursor: isConnected ? "pointer" : "not-allowed",
-            }}
-            onClick={startGame}
-            disabled={!isConnected || userBalance < val}
-            title={isConnected ? "Start the game" : "Connect your wallet to start the game"}
-          >
-            Start Game
-          </button> */}
       {gameOver && playerHand.length === 0 && (
         <>
-          <div>
-            {approveABI && needsApproval ? (
-              <>
-                <h1>Approve</h1>
-                <WriteOnlyFunctionForm
-                  abi={tokenContractABI}
-                  abiFunction={approveABI}
-                  contractAddress={tokenContractAddress}
-                  initialFormValues={initialFormValuesApprove}
-                  hideFunctionInputs={true}
-                  onChange={() => {
-                    setNeedsApproval(false);
-                  }}
-                />
-              </>
-            ) : (
-              <>
-                <h1>Start Game</h1>
-                {initiateGameABI && (
-                  <WriteOnlyFunctionForm
-                    abi={blackJackContractABI}
-                    abiFunction={initiateGameABI}
-                    contractAddress={blackJackContractAddress}
-                    initialFormValues={initialFormValuesInitiate}
-                    hideFunctionInputs={true}
-                    onChange={() => {
-                      startGame();
-                    }}
-                  />
-                )}
-              </>
-            )}
-          </div>
+          <BlackjackGameInt bet={bet} handleStartGame={startGame} setMessage={setMessage} />
 
           <button onClick={handleBack} style={styles.backButton}>
             Back to Home
@@ -434,30 +223,14 @@ const BlackjackGame: React.FC = () => {
             <Hand hand={dealerHand} title="Dealer Hand" hidden={!gameOver} />
           </div>
           <div style={styles.actionButtonsContainer}>
-            {executeActionABI && (
-              <>
-                <WriteOnlyFunctionForm
-                  abi={blackJackContractABI}
-                  abiFunction={executeActionABI}
-                  contractAddress={blackJackContractAddress}
-                  initialFormValues={initialFormValuesHit}
-                  hideFunctionInputs={true}
-                  onChange={() => {
-                    playerHit();
-                  }}
-                />
-                <WriteOnlyFunctionForm
-                  abi={blackJackContractABI}
-                  abiFunction={executeActionABI}
-                  contractAddress={blackJackContractAddress}
-                  initialFormValues={initialFormValuesStand}
-                  hideFunctionInputs={true}
-                  onChange={() => {
-                    playerStand();
-                  }}
-                />
-              </>
-            )}
+            {/* Action buttons can be handled here or in another component */}
+            {/* For now, we'll keep them here */}
+            <button onClick={playerHit} style={styles.actionButton}>
+              Hit
+            </button>
+            <button onClick={playerStand} style={styles.actionButton}>
+              Stand
+            </button>
           </div>
           {message && <h3 style={styles.message}>{message}</h3>}
         </div>
