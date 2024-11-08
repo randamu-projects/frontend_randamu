@@ -1,12 +1,18 @@
 // ThreeBayMarket.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CSSProperties } from "react";
 import Image from "next/image";
 import ThreeBayIntegration from "./3bayIntegration";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
+import { randamu } from "~~/randmu";
+import deployedContracts from "../../contracts/deployedContracts";
+import { ConditionalEncryption } from "@randamu/conditional-encryption"
+import type { TimeCondition, ContractFieldCondition, And } from "./conditions"
+
+
 
 // ThreeBayMarket.tsx
 
@@ -52,6 +58,37 @@ const mockNFTs: NFT[] = [
   // Add more mock NFTs as needed
 ];
 
+const nftMinterContractInfo = deployedContracts[31337].NftMinter;
+
+const nftData = useReadContracts({
+  contracts: [
+    {
+      address: nftMinterContractInfo.address,
+      abi: nftMinterContractInfo.abi,
+      functionName: "tokenURI",
+      chainId: randamu.id,
+      args: [BigInt(0)],
+    },
+    {
+      address: nftMinterContractInfo.address,
+      abi: nftMinterContractInfo.abi,
+      functionName: "name",
+      chainId: randamu.id,
+    },
+  ],
+})
+
+useEffect(() => {
+  mockNFTs.push({
+    id: 0,
+    name: nftData.data?.[1].result || "",
+    image: nftData.data?.[0].result || "",
+    description: "Description of NFT Gamma.",
+    address: nftMinterContractInfo.address,
+    dateMinted: "Never",
+  },)
+});
+
 const ThreeBayMarket: React.FC = () => {
   const [selectedNFTIndex, setSelectedNFTIndex] = useState<number | null>(null);
   const [selectedNFTItem, setSelectedNFTItem] = useState<NFT | null>(null);
@@ -60,6 +97,9 @@ const ThreeBayMarket: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [showCreateAuction, setShowCreateAuction] = useState(false);
   const { address, isConnected } = useAccount();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
 
   const handleNFTClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
@@ -92,10 +132,26 @@ const ThreeBayMarket: React.FC = () => {
 
   // Handler for the Create Auction button
   const handleCreateAuctionClick = () => {
-    if (selectedNFTItem) {
+    if (selectedNFTItem && startDate && endDate) {
+      const startDateTimestamp = new Date(startDate).getTime();
+      const endDateTimestamp = new Date(endDate).getTime();
+  
+      const timeCondition: TimeCondition = {
+        type: "time",
+        chainHeight: 123456n, // Replace with actual chain height if necessary
+        chainID: 31337n,
+        startDate: BigInt(startDateTimestamp),
+        endDate: BigInt(endDateTimestamp),
+      };
+  
+      //TODO: Proceed with creating the auction using the timeCondition
+      console.log("Time Condition:", timeCondition);
       setShowCreateAuction(true);
+    } else {
+      console.log("Please fill in both start and end dates.");
     }
   };
+  
 
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -203,6 +259,31 @@ const ThreeBayMarket: React.FC = () => {
 
       {/* Render ThreeBayIntegration when Create Auction is clicked */}
       {showCreateAuction && selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
+      {showCreateAuction && selectedNFTItem && (
+        <div style={styles.auctionMenu}>
+          <label>
+            Start Date:
+            <input
+              type="datetime-local"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              style={styles.dateInput}
+            />
+          </label>
+          <label>
+            End Date:
+            <input
+              type="datetime-local"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              style={styles.dateInput}
+            />
+          </label>
+          <button style={styles.createAuctionButton} onClick={handleCreateAuction}>
+            Create Auction
+          </button>
+        </div>
+      )}
 
       {/* Add the button to fetch NFTs */}
       <button style={styles.fetchButton} onClick={handleFetchNfts}>
