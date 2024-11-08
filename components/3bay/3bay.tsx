@@ -1,15 +1,27 @@
+// ThreeBayMarket.tsx
 "use client";
 
 import React, { useState } from "react";
 import { CSSProperties } from "react";
 import Image from "next/image";
+import ThreeBayIntegration from "./3bayIntegration";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount } from "wagmi";
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+
 
 interface NFT {
   id: number;
   name: string;
   image: string;
   description: string;
+  address?: string;
+  dateMinted?: string;
+  price?: number;
 }
 
 const mockNFTs: NFT[] = [
@@ -18,40 +30,112 @@ const mockNFTs: NFT[] = [
     name: "NFT Alpha",
     image: "/Nfts/nft1.png",
     description: "Description of NFT Alpha.",
+    address: "0x123...",
+    dateMinted: "2023-01-01",
   },
   {
     id: 2,
     name: "NFT Beta",
     image: "/Nfts/nft2.png",
     description: "Description of NFT Beta.",
+    address: "0x456...",
+    dateMinted: "2023-02-01",
   },
   {
     id: 3,
     name: "NFT Gamma",
     image: "/Nfts/nft2.png",
-    description: "Description of NFT Beta.",
+    description: "Description of NFT Gamma.",
+    address: "0x789...",
+    dateMinted: "2023-03-01",
   },
   // Add more mock NFTs as needed
 ];
 
 const ThreeBayMarket: React.FC = () => {
-  const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
+  const [selectedNFTIndex, setSelectedNFTIndex] = useState<number | null>(null);
+  const [selectedNFTItem, setSelectedNFTItem] = useState<NFT | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [fetchedNFTs, setFetchedNFTs] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showCreateAuction, setShowCreateAuction] = useState(false);
+  const { address, isConnected } = useAccount();
 
-  const handleNFTClick = (nft: NFT) => {
-    setSelectedNFT(nft);
+  const handleNFTClick = (item: any, index: number) => {
+    if (selectedNFTIndex === index) {
+      // NFT is already selected, deselect it
+      setSelectedNFTIndex(null);
+      setSelectedNFTItem(null);
+      setShowCreateAuction(false);
+    } else {
+      // Select this NFT and deselect others
+      setSelectedNFTIndex(index);
+      setSelectedNFTItem(item);
+      setShowCreateAuction(false);
+    }
+  };
+
+  const handleNFTDoubleClick = (item: any, index: number) => {
+    if (selectedNFTIndex === index) {
+      // Open the modal
+      setShowModal(true);
+    }
   };
 
   const handleCloseModal = () => {
-    setSelectedNFT(null);
+    setShowModal(false);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  // Handler for the Create Auction button
+  const handleCreateAuctionClick = () => {
+    if (selectedNFTItem) {
+      setShowCreateAuction(true);
+    }
+  };
+
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // The getNft function
+  async function getNft(address: string) {
+    if (isConnected) {
+      const apiUrl = `https://blockscout.firepit.network/addresses/${address}/nft`;
+
+      try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+        // Update the state with the fetched data
+        setFetchedNFTs(data);
+      } catch (error) {
+        console.error("Error:", error);
+        // Optionally, handle the error state
+        setFetchedNFTs(null);
+      }
+    } else {
+      // If not connected, you might want to show a message or handle accordingly
+      console.log("Wallet not connected");
+    }
+  }
+
+  // Handler for the button click
+  const handleFetchNfts = () => {
+    if (address) {
+      getNft(address);
+    } else {
+      console.log("No address found");
+    }
+  };
+
+  console.log("Address:", address);
 
   return (
     <div style={styles.marketContainer}>
@@ -65,27 +149,100 @@ const ThreeBayMarket: React.FC = () => {
         value={searchQuery}
         onChange={handleSearchChange}
         style={styles.searchBar}
+        className="search-input"
       />
-      <div style={styles.gridContainer}>
-        {filteredNFTs.map(nft => (
-          <div key={nft.id} style={styles.nftCase} onClick={() => handleNFTClick(nft)}>
-            <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
-          </div>
-        ))}
-      </div>
 
-      {selectedNFT && (
+      {/* Display the fetched NFTs */}
+      {fetchedNFTs ? (
+        <div style={styles.fetchedNftsContainer}>
+          <h2>My NFTs:</h2>
+          <div style={styles.gridContainer}>
+            {fetchedNFTs.items.map((item: any, index: number) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.nftCase,
+                  ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
+                }}
+                onClick={() => handleNFTClick(item, index)}
+                onDoubleClick={() => handleNFTDoubleClick(item, index)}
+              >
+                {item.token_instances[0]?.image_url && (
+                  <img src={item.token_instances[0].image_url} alt={item.token.name} style={styles.nftImage} />
+                )}
+                <h3>{item.token.name}</h3>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        // If no NFTs are fetched, display mock NFTs
+        <div style={styles.gridContainer}>
+          {filteredNFTs.map((nft, index) => (
+            <div
+              key={nft.id}
+              style={{
+                ...styles.nftCase,
+                ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
+              }}
+              onClick={() => handleNFTClick(nft, index)}
+              onDoubleClick={() => handleNFTDoubleClick(nft, index)}
+            >
+              <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Create Auction Button */}
+      {selectedNFTItem && (
+        <button style={styles.createAuctionButton} onClick={handleCreateAuctionClick}>
+          Create Auction
+        </button>
+      )}
+
+      {/* Render ThreeBayIntegration when Create Auction is clicked */}
+      {showCreateAuction && selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
+
+      {/* Add the button to fetch NFTs */}
+      <button style={styles.fetchButton} onClick={handleFetchNfts}>
+        Refresh
+      </button>
+
+      {showModal && selectedNFTItem && (
         <div style={styles.modalOverlay} onClick={handleCloseModal}>
           <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <h2>{selectedNFT.name}</h2>
-            <img src={selectedNFT.image} alt={selectedNFT.name} style={styles.modalImage} />
-            <p>{selectedNFT.description}</p>
+            <div style={styles.modalBody}>
+              {selectedNFTItem ? (
+                <>
+                  {selectedNFTItem?.image && (
+                    <img src={selectedNFTItem.image} alt={selectedNFTItem.name} style={styles.modalImage} />
+                  )}
+                  <div style={styles.modalInfo}>
+                    <h2>{selectedNFTItem.name}</h2>
+                    <p>{selectedNFTItem.description}</p>
+                    <p>Address: {selectedNFTItem.address}</p>
+                    <p>Date Minted: {selectedNFTItem.dateMinted}</p>
+                    {/* Add more info as needed */}
+                  </div>
+                </>
+              ) : (
+                <p>No NFT selected</p>
+              )}
+            </div>
             <button style={styles.closeButton} onClick={handleCloseModal}>
               Close
             </button>
           </div>
         </div>
       )}
+
+      {/* Add a style block to change the placeholder text color */}
+      <style jsx>{`
+        .search-input::placeholder {
+          color: black;
+        }
+      `}</style>
     </div>
   );
 };
@@ -106,7 +263,7 @@ const styles: { [key: string]: CSSProperties } = {
     alignItems: "center",
     minHeight: "100vh",
     padding: "20px",
-    backgroundColor: "lightgray",
+    backgroundColor: "lightblue",
   },
   title: {
     fontSize: "48px",
@@ -121,6 +278,7 @@ const styles: { [key: string]: CSSProperties } = {
     borderRadius: "8px",
     border: "1px solid #ccc",
     backgroundColor: "#ffffff",
+    color: "black",
   },
   gridContainer: {
     display: "grid",
@@ -136,14 +294,51 @@ const styles: { [key: string]: CSSProperties } = {
     border: "2px solid #ccc",
     cursor: "pointer",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     padding: "10px",
     borderRadius: "8px",
+    transition: "background-color 0.3s",
+  },
+  selectedNftCase: {
+    backgroundColor: "#d0d0d0",
   },
   nftImage: {
     maxWidth: "100%",
     maxHeight: "100%",
+  },
+  fetchButton: {
+    marginTop: "20px",
+    padding: "10px 20px",
+    backgroundColor: "#0070f3",
+    border: "none",
+    borderRadius: "5px",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  createAuctionButton: {
+    marginTop: "10px",
+    padding: "10px 20px",
+    backgroundColor: "#28a745",
+    border: "none",
+    borderRadius: "5px",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  fetchedNftsContainer: {
+    marginTop: "20px",
+    width: "80%",
+    maxWidth: "800px",
+    textAlign: "center" as const,
+  },
+  nftItem: {
+    border: "1px solid #ccc",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "10px",
   },
   modalOverlay: {
     position: "fixed",
@@ -161,17 +356,27 @@ const styles: { [key: string]: CSSProperties } = {
     backgroundColor: "#fff",
     padding: "20px",
     borderRadius: "8px",
-    textAlign: "center",
+    textAlign: "center" as const,
     position: "relative",
-    maxWidth: "500px",
+    maxWidth: "700px",
     width: "90%",
   },
+  modalBody: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  modalInfo: {
+    marginLeft: "20px",
+    textAlign: "left" as const,
+  },
   modalImage: {
-    maxWidth: "100%",
+    maxWidth: "300px",
     height: "auto",
     marginBottom: "20px",
   },
   closeButton: {
+    marginTop: "20px",
     padding: "10px 20px",
     backgroundColor: "#ff9800",
     border: "none",
