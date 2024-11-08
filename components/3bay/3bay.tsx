@@ -143,7 +143,7 @@ const ThreeBayMarket: React.FC = () => {
         startDate: BigInt(startDateTimestamp),
         endDate: BigInt(endDateTimestamp),
       };
-  
+      //TODO: approve the nft
       //TODO: Proceed with creating the auction using the timeCondition
       console.log("Time Condition:", timeCondition);
       setShowCreateAuction(true);
