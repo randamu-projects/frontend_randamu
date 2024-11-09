@@ -9,8 +9,6 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContracts } from "wagmi";
 import { randamu } from "~~/randmu";
 import deployedContracts from "../../contracts/deployedContracts";
-import { ConditionalEncryption } from "@randamu/conditional-encryption"
-import type { TimeCondition, ContractFieldCondition, And } from "./conditions"
 
 
 
@@ -60,34 +58,7 @@ const mockNFTs: NFT[] = [
 
 const nftMinterContractInfo = deployedContracts[31337].NftMinter;
 
-const nftData = useReadContracts({
-  contracts: [
-    {
-      address: nftMinterContractInfo.address,
-      abi: nftMinterContractInfo.abi,
-      functionName: "tokenURI",
-      chainId: randamu.id,
-      args: [BigInt(0)],
-    },
-    {
-      address: nftMinterContractInfo.address,
-      abi: nftMinterContractInfo.abi,
-      functionName: "name",
-      chainId: randamu.id,
-    },
-  ],
-})
 
-useEffect(() => {
-  mockNFTs.push({
-    id: 0,
-    name: nftData.data?.[1].result || "",
-    image: nftData.data?.[0].result || "",
-    description: "Description of NFT Gamma.",
-    address: nftMinterContractInfo.address,
-    dateMinted: "Never",
-  },)
-});
 
 const ThreeBayMarket: React.FC = () => {
   const [selectedNFTIndex, setSelectedNFTIndex] = useState<number | null>(null);
@@ -130,6 +101,35 @@ const ThreeBayMarket: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
+  const nftData = useReadContracts({
+    contracts: [
+      {
+        address: nftMinterContractInfo.address,
+        abi: nftMinterContractInfo.abi,
+        functionName: "tokenURI",
+        chainId: randamu.id,
+        args: [BigInt(0)],
+      },
+      {
+        address: nftMinterContractInfo.address,
+        abi: nftMinterContractInfo.abi,
+        functionName: "name",
+        chainId: randamu.id,
+      },
+    ],
+  })
+  
+  useEffect(() => {
+    mockNFTs.push({
+      id: 0,
+      name: nftData.data?.[1].result || "",
+      image: nftData.data?.[0].result || "",
+      description: "Description of NFT Gamma.",
+      address: nftMinterContractInfo.address,
+      dateMinted: "Never",
+    },)
+  });
+
   // Handler for the Create Auction button
   const handleCreateAuctionClick = () => {
     if (selectedNFTItem && startDate && endDate) {
@@ -138,11 +138,10 @@ const ThreeBayMarket: React.FC = () => {
   
       const timeCondition: TimeCondition = {
         type: "time",
-        chainHeight: 123456n, // Replace with actual chain height if necessary
+        chainHeight: 123456n, //TODO: Replace with actual chain height if necessary from "endDateTimestamp"
         chainID: 31337n,
-        startDate: BigInt(startDateTimestamp),
-        endDate: BigInt(endDateTimestamp),
       };
+      ConditionalEncryption.encrypt
       //TODO: approve the nft
       //TODO: Proceed with creating the auction using the timeCondition
       console.log("Time Condition:", timeCondition);
@@ -159,7 +158,7 @@ const ThreeBayMarket: React.FC = () => {
   // The getNft function
   async function getNft(address: string) {
     if (isConnected) {
-      const apiUrl = `https://blockscout.firepit.network/addresses/${address}/nft`;
+      const apiUrl = `https://blockscout.firepit.network/api/v2/addresses/${address}/nft?type=ERC-721`;
 
       try {
         const response = await fetch(apiUrl);
