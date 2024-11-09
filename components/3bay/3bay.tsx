@@ -1,22 +1,54 @@
 // ThreeBayMarket.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { CSSProperties } from "react";
 import Image from "next/image";
 import ThreeBayIntegration from "./3bayIntegration";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useReadContracts } from "wagmi";
-import { randamu } from "~~/randmu";
-import deployedContracts from "../../contracts/deployedContracts";
-
-
+import { useAccount } from "wagmi";
 
 // ThreeBayMarket.tsx
 
 // ThreeBayMarket.tsx
 
+// ThreeBayMarket.tsx
 
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
 
 interface NFT {
   id: number;
@@ -36,6 +68,7 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Alpha.",
     address: "0x123...",
     dateMinted: "2023-01-01",
+    price: 100,
   },
   {
     id: 2,
@@ -44,6 +77,7 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Beta.",
     address: "0x456...",
     dateMinted: "2023-02-01",
+    price: 200,
   },
   {
     id: 3,
@@ -52,13 +86,10 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Gamma.",
     address: "0x789...",
     dateMinted: "2023-03-01",
+    price: 300,
   },
   // Add more mock NFTs as needed
 ];
-
-const nftMinterContractInfo = deployedContracts[31337].NftMinter;
-
-
 
 const ThreeBayMarket: React.FC = () => {
   const [selectedNFTIndex, setSelectedNFTIndex] = useState<number | null>(null);
@@ -66,25 +97,27 @@ const ThreeBayMarket: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedNFTs, setFetchedNFTs] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showCreateAuction, setShowCreateAuction] = useState(false);
-  const { address, isConnected } = useAccount();
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
 
+  const { address, isConnected } = useAccount();
 
   const handleNFTClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
       // NFT is already selected, deselect it
       setSelectedNFTIndex(null);
       setSelectedNFTItem(null);
-      setShowCreateAuction(false);
     } else {
       // Select this NFT and deselect others
       setSelectedNFTIndex(index);
       setSelectedNFTItem(item);
-      setShowCreateAuction(false);
     }
   };
+
+  console.log(selectedNFTItem?.address);
+  console.log(selectedNFTItem?.id);
+  console.log(selectedNFTItem?.name);
+  console.log(selectedNFTItem?.description);
+  console.log(selectedNFTItem?.dateMinted);
+  console.log(selectedNFTItem?.price);
 
   const handleNFTDoubleClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
@@ -101,57 +134,6 @@ const ThreeBayMarket: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
-  const nftData = useReadContracts({
-    contracts: [
-      {
-        address: nftMinterContractInfo.address,
-        abi: nftMinterContractInfo.abi,
-        functionName: "tokenURI",
-        chainId: randamu.id,
-        args: [BigInt(0)],
-      },
-      {
-        address: nftMinterContractInfo.address,
-        abi: nftMinterContractInfo.abi,
-        functionName: "name",
-        chainId: randamu.id,
-      },
-    ],
-  })
-  
-  useEffect(() => {
-    mockNFTs.push({
-      id: 0,
-      name: nftData.data?.[1].result || "",
-      image: nftData.data?.[0].result || "",
-      description: "Description of NFT Gamma.",
-      address: nftMinterContractInfo.address,
-      dateMinted: "Never",
-    },)
-  });
-
-  // Handler for the Create Auction button
-  const handleCreateAuctionClick = () => {
-    if (selectedNFTItem && startDate && endDate) {
-      const startDateTimestamp = new Date(startDate).getTime();
-      const endDateTimestamp = new Date(endDate).getTime();
-  
-      const timeCondition: TimeCondition = {
-        type: "time",
-        chainHeight: 123456n, //TODO: Replace with actual chain height if necessary from "endDateTimestamp"
-        chainID: 31337n,
-      };
-      ConditionalEncryption.encrypt
-      //TODO: approve the nft
-      //TODO: Proceed with creating the auction using the timeCondition
-      console.log("Time Condition:", timeCondition);
-      setShowCreateAuction(true);
-    } else {
-      console.log("Please fill in both start and end dates.");
-    }
-  };
-  
-
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -161,7 +143,7 @@ const ThreeBayMarket: React.FC = () => {
       const apiUrl = `https://blockscout.firepit.network/api/v2/addresses/${address}/nft?type=ERC-721`;
 
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, { mode: "no-cors" });
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -249,40 +231,15 @@ const ThreeBayMarket: React.FC = () => {
         </div>
       )}
 
-      {/* Create Auction Button */}
       {selectedNFTItem && (
-        <button style={styles.createAuctionButton} onClick={handleCreateAuctionClick}>
-          Create Auction
+        <button style={styles.closeButton} onClick={() => setShowModal(true)}>
+          Show info
         </button>
       )}
 
+      {/* Create Auction Button */}
       {/* Render ThreeBayIntegration when Create Auction is clicked */}
-      {showCreateAuction && selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
-      {showCreateAuction && selectedNFTItem && (
-        <div style={styles.auctionMenu}>
-          <label>
-            Start Date:
-            <input
-              type="datetime-local"
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-              style={styles.dateInput}
-            />
-          </label>
-          <label>
-            End Date:
-            <input
-              type="datetime-local"
-              value={endDate}
-              onChange={e => setEndDate(e.target.value)}
-              style={styles.dateInput}
-            />
-          </label>
-          <button style={styles.createAuctionButton} onClick={handleCreateAuction}>
-            Create Auction
-          </button>
-        </div>
-      )}
+      {selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
 
       {/* Add the button to fetch NFTs */}
       <button style={styles.fetchButton} onClick={handleFetchNfts}>
