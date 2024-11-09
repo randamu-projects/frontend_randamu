@@ -12,7 +12,39 @@ import { useAccount } from "wagmi";
 
 // ThreeBayMarket.tsx
 
+// ThreeBayMarket.tsx
 
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
+
+// ThreeBayMarket.tsx
 
 interface NFT {
   id: number;
@@ -32,6 +64,7 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Alpha.",
     address: "0x123...",
     dateMinted: "2023-01-01",
+    price: 100,
   },
   {
     id: 2,
@@ -40,6 +73,7 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Beta.",
     address: "0x456...",
     dateMinted: "2023-02-01",
+    price: 200,
   },
   {
     id: 3,
@@ -48,6 +82,7 @@ const mockNFTs: NFT[] = [
     description: "Description of NFT Gamma.",
     address: "0x789...",
     dateMinted: "2023-03-01",
+    price: 300,
   },
   // Add more mock NFTs as needed
 ];
@@ -58,7 +93,7 @@ const ThreeBayMarket: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedNFTs, setFetchedNFTs] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showCreateAuction, setShowCreateAuction] = useState(false);
+
   const { address, isConnected } = useAccount();
 
   const handleNFTClick = (item: any, index: number) => {
@@ -66,14 +101,19 @@ const ThreeBayMarket: React.FC = () => {
       // NFT is already selected, deselect it
       setSelectedNFTIndex(null);
       setSelectedNFTItem(null);
-      setShowCreateAuction(false);
     } else {
       // Select this NFT and deselect others
       setSelectedNFTIndex(index);
       setSelectedNFTItem(item);
-      setShowCreateAuction(false);
     }
   };
+
+  console.log(selectedNFTItem?.address);
+  console.log(selectedNFTItem?.id);
+  console.log(selectedNFTItem?.name);
+  console.log(selectedNFTItem?.description);
+  console.log(selectedNFTItem?.dateMinted);
+  console.log(selectedNFTItem?.price);
 
   const handleNFTDoubleClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
@@ -90,23 +130,16 @@ const ThreeBayMarket: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
-  // Handler for the Create Auction button
-  const handleCreateAuctionClick = () => {
-    if (selectedNFTItem) {
-      setShowCreateAuction(true);
-    }
-  };
-
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // The getNft function
   async function getNft(address: string) {
     if (isConnected) {
-      const apiUrl = `https://blockscout.firepit.network/addresses/${address}/nft`;
+      const apiUrl = `https://blockscout.firepit.network/api/v2/addresses/${address}/nft?type=ERC-721`;
 
       try {
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, { mode: "no-cors" });
 
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -194,15 +227,15 @@ const ThreeBayMarket: React.FC = () => {
         </div>
       )}
 
-      {/* Create Auction Button */}
       {selectedNFTItem && (
-        <button style={styles.createAuctionButton} onClick={handleCreateAuctionClick}>
-          Create Auction
+        <button style={styles.closeButton} onClick={() => setShowModal(true)}>
+          Show info
         </button>
       )}
 
+      {/* Create Auction Button */}
       {/* Render ThreeBayIntegration when Create Auction is clicked */}
-      {showCreateAuction && selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
+      {selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
 
       {/* Add the button to fetch NFTs */}
       <button style={styles.fetchButton} onClick={handleFetchNfts}>

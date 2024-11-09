@@ -24,6 +24,10 @@ import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
 
 // 3bayIntegration.tsx
 
+// 3bayIntegration.tsx
+
+// 3bayIntegration.tsx
+
 interface ThreeBayIntegrationProps {
   selectedNFT: any;
   conditions?: any;
@@ -54,6 +58,8 @@ const ThreeBayIntegration: React.FC<ThreeBayIntegrationProps> = ({ selectedNFT, 
     // Add other parameters as needed
   };
 
+  console.log("True ", initialCreateAuctionValues);
+
   useWatchContractEvent({
     abi: threeBayContractABI,
     address: threeBayContractAddress,
@@ -66,7 +72,6 @@ const ThreeBayIntegration: React.FC<ThreeBayIntegrationProps> = ({ selectedNFT, 
 
   return (
     <div style={styles.integrationContainer}>
-      <h2 style={styles.integrationTitle}>Create Auction</h2>
       {isConnected ? (
         createAuctionABI ? (
           <WriteOnlyFunctionForm

@@ -2,12 +2,36 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { ACTION_REFRESH } from "next/dist/client/components/router-reducer/router-reducer-types";
 import deployedContracts from "../../contracts/deployedContracts";
 import { Address } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { useWaitForTransactionReceipt } from "wagmi";
 import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
 import { randamu } from "~~/randmu";
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
+
+// BlackjackGameInt.tsx
 
 // BlackjackGameInt.tsx
 
@@ -51,8 +75,7 @@ const BlackjackGameInt: React.FC<BlackjackGameIntProps> = ({ bet, handleStartGam
     _betAmount: BigInt(bet || "0") * BigInt(10 ** 18),
   };
 
-  // Read the allowance
-  const { data: allowanceData } = useReadContract({
+  let { data: allowanceData } = useReadContract({
     address: tokenContractAddress,
     abi: tokenContractABI,
     functionName: "allowance",
@@ -62,16 +85,24 @@ const BlackjackGameInt: React.FC<BlackjackGameIntProps> = ({ bet, handleStartGam
 
   useEffect(() => {
     const betAmountBigInt = BigInt(bet || "0") * BigInt(10 ** 18);
-    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
+    if (allowanceData === undefined || allowanceData < betAmountBigInt) {
       setNeedsApproval(true);
     } else {
       setNeedsApproval(false);
     }
   }, [allowanceData, bet]);
 
-  const { data: txResult } = useWaitForTransactionReceipt({
-    hash: result,
-  });
+  console.log("Needs approval: ", needsApproval);
+  console.log("Allowance: ", allowanceData);
+
+  useEffect(() => {
+    const betAmountBigInt = BigInt(bet || "0") * BigInt(10 ** 18);
+    if (allowanceData === undefined || allowanceData < betAmountBigInt) {
+      setNeedsApproval(true);
+    } else {
+      setNeedsApproval(false);
+    }
+  }, [allowanceData, bet]);
 
   return (
     <div>
@@ -85,6 +116,7 @@ const BlackjackGameInt: React.FC<BlackjackGameIntProps> = ({ bet, handleStartGam
             hideFunctionInputs={true}
             buttonText="Approve"
             onChange={() => {
+              allowanceData = BigInt(bet || "0") * BigInt(10 ** 18);
               setNeedsApproval(false);
               setMessage("Approval successful!");
             }}

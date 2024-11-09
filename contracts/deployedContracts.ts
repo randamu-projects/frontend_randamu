@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     DumbERC20: {
-      address: "0x5586e9790807Aa8C285C27FDd97753629b98963b",
+      address: "0x4Eb5F6AE80d53Ff99d13319e1A1BA520781B6587",
       abi: [
         {
           type: "constructor",
@@ -326,7 +326,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     Roulette: {
-      address: "0x42DaF378D5Fa6Fd4a5225990eee43728A0053eA7",
+      address: "0x99C28cc532238aE2126Fd4D2245EbE5f3c6aE65F",
       abi: [
         {
           type: "constructor",
