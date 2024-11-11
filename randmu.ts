@@ -12,6 +12,7 @@ export const randamu: Chain = /*#__PURE__*/ defineChain({
   rpcUrls: {
     default: {
       http: ["https://furnace.firepit.network"],
+      webSocket: ["ws://furnace.firepit.network/"],
     },
   },
 

@@ -6,79 +6,140 @@ import { useRouter } from "next/navigation";
 import { styles } from "../../styles/BlackJackGameStyles";
 import { calculateTotal, createDeck } from "../../utils/cardUtils";
 import Hand from "../Blackjack/Hand";
-import { useAccount } from "wagmi";
+import BlackjackGameInt from "./BlackjackGameInt";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 // BlackjackGame.tsx
 
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+// BlackjackGame.tsx
+
+interface Card {
+  value: string;
+  suit: string;
+}
+
+interface GameState {
+  deck: Card[];
+  playerHand: Card[];
+  dealerHand: Card[];
+  gameOver: boolean;
+  message: string;
+  bet: string;
+  playerTotal: number;
+  dealerTotal: number;
+  isDealerDrawing: boolean;
+}
 
 const BlackjackGame: React.FC = () => {
   const router = useRouter();
-  const { isConnected } = useAccount();
-
-  const [deck, setDeck] = useState(createDeck());
-  const [playerHand, setPlayerHand] = useState<{ value: string; suit: string }[]>([]);
-  const [dealerHand, setDealerHand] = useState<{ value: string; suit: string }[]>([]);
-  const [gameOver, setGameOver] = useState(true);
-  const [message, setMessage] = useState("");
   const [userBalance, setUserBalance] = useState(1000);
   const [, setDealerBalance] = useState(1000000);
-  const [bet, setBet] = useState<string>("");
-  const [playerTotal, setPlayerTotal] = useState(0);
-  const [dealerTotal, setDealerTotal] = useState(0);
-  const [isDealerDrawing, setIsDealerDrawing] = useState(false);
+  const [gameStates, setGameStates] = useState<Record<number, GameState>>({});
 
-  const val = parseFloat(bet);
+  // Updated nonce state to manage input value and parsed number
+  const [nonceInputValue, setNonceInputValue] = useState<string>("");
+  const [nonce, setNonce] = useState<number>(0);
 
-  useEffect(() => {
-    setPlayerTotal(calculateTotal(playerHand));
-  }, [playerHand]);
+  const [currentGameState, setCurrentGameState] = useState<GameState | null>(null);
 
   useEffect(() => {
-    setDealerTotal(calculateTotal(dealerHand));
-  }, [dealerHand]);
+    if (nonce !== undefined) {
+      if (gameStates[nonce]) {
+        setCurrentGameState(gameStates[nonce]);
+      } else {
+        const initialGameState: GameState = {
+          deck: createDeck(),
+          playerHand: [],
+          dealerHand: [],
+          gameOver: true,
+          message: "",
+          bet: "",
+          playerTotal: 0,
+          dealerTotal: 0,
+          isDealerDrawing: false,
+        };
+        setGameStates(prev => ({ ...prev, [nonce]: initialGameState }));
+        setCurrentGameState(initialGameState);
+      }
+    }
+  }, [nonce]);
+
+  useEffect(() => {
+    if (nonce !== undefined && currentGameState) {
+      setGameStates(prev => ({ ...prev, [nonce]: currentGameState }));
+    }
+  }, [nonce, currentGameState]);
+
+  useEffect(() => {
+    if (currentGameState) {
+      setCurrentGameState(prev => prev && { ...prev, playerTotal: calculateTotal(prev.playerHand) });
+    }
+  }, [currentGameState?.playerHand]);
+
+  useEffect(() => {
+    if (currentGameState) {
+      setCurrentGameState(prev => prev && { ...prev, dealerTotal: calculateTotal(prev.dealerHand) });
+    }
+  }, [currentGameState?.dealerHand]);
 
   const handleBetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setBet(event.target.value);
+    const newBet = event.target.value;
+    setCurrentGameState(prev => prev && { ...prev, bet: newBet });
   };
+
+  // Updated to parse bet as float when needed
+  const val = parseFloat(currentGameState?.bet || "0");
 
   const startGame = () => {
     if (userBalance < val) {
-      setMessage("You don't have enough money to place this bet!");
+      setCurrentGameState(prev => prev && { ...prev, message: "You don't have enough money to place this bet!" });
       return;
     }
 
-    if (val < 0) {
-      setMessage("Invalid bet");
+    if (val <= 0) {
+      setCurrentGameState(prev => prev && { ...prev, message: "Invalid bet" });
       return;
     }
 
     if (Number.isNaN(val)) {
-      setMessage("Enter a bet");
+      setCurrentGameState(prev => prev && { ...prev, message: "Enter a valid bet" });
       return;
     }
 
     setUserBalance(prev => prev - val);
     setDealerBalance(prev => prev + val);
 
-    let deckCopy = [...deck];
+    let deckCopy = [...(currentGameState?.deck || [])];
     if (deckCopy.length < 10) {
       deckCopy = createDeck();
-      setMessage("Deck is reshuffled!");
+      setCurrentGameState(prev => prev && { ...prev, message: "Deck is reshuffled!" });
     }
 
     const newPlayerHand = [deckCopy.pop()!, deckCopy.pop()!];
     const newDealerHand = [deckCopy.pop()!, deckCopy.pop()!];
 
-    setPlayerHand(newPlayerHand);
-    setDealerHand(newDealerHand);
-    setDeck(deckCopy);
-    setGameOver(false);
-    setMessage("");
+    setCurrentGameState(
+      prev =>
+        prev && {
+          ...prev,
+          deck: deckCopy,
+          playerHand: newPlayerHand,
+          dealerHand: newDealerHand,
+          gameOver: false,
+          message: "",
+        },
+    );
   };
 
   const startNextHand = () => {
     if (userBalance < val) {
-      setMessage("You don't have enough funds to cover the bet!");
+      setCurrentGameState(prev => prev && { ...prev, message: "You don't have enough funds to cover the bet!" });
       return;
     }
     startGame();
@@ -89,62 +150,87 @@ const BlackjackGame: React.FC = () => {
   };
 
   const playerHit = () => {
-    if (deck.length === 0) {
-      setMessage("No more cards in the deck!");
+    if ((currentGameState?.deck || []).length === 0) {
+      setCurrentGameState(prev => prev && { ...prev, message: "No more cards in the deck!" });
       return;
     }
 
-    const deckCopy = [...deck];
-    const newPlayerHand = [...playerHand, deckCopy.pop()!];
-    setPlayerHand(newPlayerHand);
-    setDeck(deckCopy);
+    const deckCopy = [...(currentGameState?.deck || [])];
+    const newPlayerHand = [...(currentGameState?.playerHand || []), deckCopy.pop()!];
+
+    setCurrentGameState(
+      prev =>
+        prev && {
+          ...prev,
+          playerHand: newPlayerHand,
+          deck: deckCopy,
+        },
+    );
 
     const newTotal = calculateTotal(newPlayerHand);
     if (newTotal > 21) {
-      setGameOver(true);
-      setMessage("You bust! Dealer wins.");
+      setCurrentGameState(
+        prev =>
+          prev && {
+            ...prev,
+            gameOver: true,
+            message: "You bust! Dealer wins.",
+          },
+      );
       handleLoss();
     } else if (newTotal === 21) {
-      setGameOver(true);
-      setMessage("You hit 21! You win!");
+      setCurrentGameState(
+        prev =>
+          prev && {
+            ...prev,
+            gameOver: true,
+            message: "You hit 21! You win!",
+          },
+      );
       handleWin(newTotal);
     }
   };
 
   const playerStand = async () => {
-    setIsDealerDrawing(true);
-    const deckCopy = [...deck];
-    const newDealerHand = [...dealerHand];
+    setCurrentGameState(prev => prev && { ...prev, isDealerDrawing: true });
+    const deckCopy = [...(currentGameState?.deck || [])];
+    const newDealerHand = [...(currentGameState?.dealerHand || [])];
 
     while (calculateTotal(newDealerHand) < 17 && deckCopy.length > 0) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const newCard = deckCopy.pop()!;
       newDealerHand.push(newCard);
-      setDealerHand([...newDealerHand]);
-      setDeck(deckCopy);
+      setCurrentGameState(
+        prev =>
+          prev && {
+            ...prev,
+            dealerHand: [...newDealerHand],
+            deck: deckCopy,
+          },
+      );
     }
 
-    setIsDealerDrawing(false);
+    setCurrentGameState(prev => prev && { ...prev, isDealerDrawing: false });
 
-    const currentPlayerTotal = calculateTotal(playerHand);
+    const currentPlayerTotal = calculateTotal(currentGameState?.playerHand || []);
     const currentDealerTotal = calculateTotal(newDealerHand);
 
     if (currentDealerTotal > 21) {
-      setMessage("Dealer busts! You win!");
+      setCurrentGameState(prev => prev && { ...prev, message: "Dealer busts! You win!" });
       handleWin(currentPlayerTotal);
     } else if (currentPlayerTotal > currentDealerTotal) {
-      setMessage("You win!");
+      setCurrentGameState(prev => prev && { ...prev, message: "You win!" });
       handleWin(currentPlayerTotal);
     } else if (currentDealerTotal > currentPlayerTotal) {
-      setMessage("Dealer wins.");
+      setCurrentGameState(prev => prev && { ...prev, message: "Dealer wins." });
       handleLoss();
     } else {
-      setMessage("It’s a tie!");
+      setCurrentGameState(prev => prev && { ...prev, message: "It's a tie!" });
       setUserBalance(prev => prev + val);
       setDealerBalance(prev => prev - val);
     }
 
-    setGameOver(true);
+    setCurrentGameState(prev => prev && { ...prev, gameOver: true });
   };
 
   const handleWin = (playerTotal: number) => {
@@ -160,106 +246,155 @@ const BlackjackGame: React.FC = () => {
   };
 
   const handleLoss = () => {
-    //
+    // Handle loss (if needed)
   };
 
   const calculateVisibleDealerTotal = () => {
-    if (gameOver) {
-      return dealerTotal;
+    if (currentGameState?.gameOver) {
+      return currentGameState?.dealerTotal || 0;
     } else {
-      return calculateTotal([dealerHand[1]]);
+      const dealerHand = currentGameState?.dealerHand || [];
+      if (dealerHand.length > 1 && dealerHand[1]) {
+        return calculateTotal([dealerHand[1]]);
+      } else {
+        return 0;
+      }
+    }
+  };
+
+  // Updated to only update nonceInputValue
+  const handleNonceInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setNonceInputValue(value);
+  };
+
+  // Function to apply the nonce change when the button is clicked
+  const applyNonceChange = () => {
+    const newNonce = parseInt(nonceInputValue, 10);
+    if (!Number.isNaN(newNonce)) {
+      setNonce(newNonce);
+      // Optionally, you can clear any messages or set a new message indicating the game has switched
+      setCurrentGameState(prev => prev && { ...prev, message: "Switched to Game ID: " + newNonce });
+    } else {
+      // Handle invalid nonce input
+      setCurrentGameState(prev => prev && { ...prev, message: "Please enter a valid Game ID (number)." });
     }
   };
 
   const changeBet = (newBet: number) => {
-    setBet(newBet.toString());
+    setCurrentGameState(prev => prev && { ...prev, bet: newBet.toString() });
   };
 
   return (
     <div style={styles.container}>
+      <div style={styles.connectKitContainer}>
+        <ConnectButton />
+      </div>
+
       <h1 style={styles.header}>Blackjack</h1>
+
       <div style={styles.balanceContainer}>
         <h2 style={styles.balanceText}>Your Balance: ${userBalance}</h2>
-        <h3 style={styles.playerTotalText}>Player Total: {playerTotal}</h3>
+
+        {/* Nonce Input and Load Game Button */}
+        <div style={styles.nonceContainer}>
+          <label htmlFor="nonce" style={styles.betLabel}>
+            Game ID (Nonce):
+          </label>
+          <input
+            id="nonce"
+            type="text"
+            value={nonceInputValue}
+            onChange={handleNonceInputChange}
+            style={styles.betInput}
+            placeholder="Enter Nonce"
+          />
+          <button onClick={applyNonceChange} style={styles.backButton}>
+            Load Game
+          </button>
+        </div>
+
+        <h3 style={styles.playerTotalText}>Player Total: {currentGameState?.playerTotal}</h3>
         <h3 style={styles.dealerTotalText}>Dealer Total: {calculateVisibleDealerTotal()}</h3>
         <div>
-          <h3 style={styles.playerTotalText}>Bet: {bet}</h3>
+          <h3 style={styles.playerTotalText}>Bet: {currentGameState?.bet}</h3>
         </div>
-        {gameOver && playerHand.length === 0 && (
+        {currentGameState?.gameOver && currentGameState?.playerHand.length === 0 && (
           <div style={styles.betContainer}>
             <label htmlFor="bet" style={styles.betLabel}>
               Place Your Bet:
             </label>
             <input
               id="bet"
-              type="number"
-              value={bet}
+              type="text"
+              value={currentGameState?.bet}
               onChange={handleBetChange}
-              disabled={!gameOver}
+              disabled={!currentGameState?.gameOver}
               style={styles.betInput}
+              placeholder="Enter Bet Amount"
             />
           </div>
         )}
       </div>
 
-      {gameOver && playerHand.length === 0 && (
+      {currentGameState?.gameOver && currentGameState?.playerHand.length === 0 && (
         <>
-          <button
-            style={{
-              ...styles.startButton,
-              backgroundColor: isConnected ? "#4CAF50" : "#808080",
-              cursor: isConnected ? "pointer" : "not-allowed",
-            }}
-            onClick={startGame}
-            disabled={!isConnected || userBalance < val}
-            title={isConnected ? "Start the game" : "Connect your wallet to start the game"}
-          >
-            Start Game
-          </button>
+          <BlackjackGameInt
+            bet={currentGameState?.bet}
+            handleStartGame={startGame}
+            setMessage={msg => setCurrentGameState(prev => prev && { ...prev, message: msg as string })}
+          />
+
           <button onClick={handleBack} style={styles.backButton}>
             Back to Home
           </button>
-          {message && <h3 style={styles.message}>{message}</h3>}
+          {currentGameState?.message && <h3 style={styles.message}>{currentGameState?.message}</h3>}
         </>
       )}
 
-      {!gameOver && (
+      {!currentGameState?.gameOver && (
         <div style={styles.gameContainer}>
           <div style={styles.handsContainer}>
-            <Hand hand={playerHand} title="Player Hand" />
-            <Hand hand={dealerHand} title="Dealer Hand" hidden={!gameOver} />
+            <Hand hand={currentGameState?.playerHand || []} title="Player Hand" />
+            <Hand hand={currentGameState?.dealerHand || []} title="Dealer Hand" hidden={!currentGameState?.gameOver} />
           </div>
           <div style={styles.actionButtonsContainer}>
-            <button style={styles.hitButton} onClick={playerHit} disabled={gameOver || isDealerDrawing}>
+            <button onClick={playerHit} style={styles.actionButton}>
               Hit
             </button>
-            <button style={styles.standButton} onClick={playerStand} disabled={gameOver || isDealerDrawing}>
+            <button onClick={playerStand} style={styles.actionButton}>
               Stand
             </button>
           </div>
-          {message && <h3 style={styles.message}>{message}</h3>}
+          {currentGameState?.message && <h3 style={styles.message}>{currentGameState?.message}</h3>}
         </div>
       )}
 
-      {gameOver && playerHand.length > 0 && (
+      {currentGameState?.gameOver && currentGameState?.playerHand.length > 0 && (
         <div style={styles.gameContainer}>
           <div style={styles.handsContainer}>
-            <Hand hand={playerHand} title="Player Hand" />
-            <Hand hand={dealerHand} title="Dealer Hand" hidden={false} />
+            <Hand hand={currentGameState?.playerHand || []} title="Player Hand" />
+            <Hand hand={currentGameState?.dealerHand || []} title="Dealer Hand" hidden={false} />
           </div>
-          {message && <h3 style={styles.message}>{message}</h3>}
+          {currentGameState?.message && <h3 style={styles.message}>{currentGameState?.message}</h3>}
           <button onClick={startNextHand} style={styles.startButton} disabled={userBalance < val}>
             Next Hand
           </button>
 
-          <input
-            id="bet"
-            type="number"
-            onChange={e => changeBet(parseFloat(e.target.value))}
-            disabled={!gameOver}
-            style={styles.betInputLarge}
-            placeholder="Enter new bet"
-          ></input>
+          {/* Bet Input for Next Hand */}
+          <div style={styles.betContainer}>
+            <label htmlFor="bet" style={styles.betLabel}>
+              Enter New Bet:
+            </label>
+            <input
+              id="bet"
+              type="text"
+              onChange={e => changeBet(parseFloat(e.target.value))}
+              disabled={!currentGameState?.gameOver}
+              style={styles.betInputLarge}
+              placeholder="Enter New Bet"
+            />
+          </div>
 
           <button onClick={handleBack} style={styles.backButton}>
             Back to Home

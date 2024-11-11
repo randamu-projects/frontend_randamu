@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { WriteOnlyFunctionForm } from "../../app/debug/_components/contract/WriteOnlyFunctionForm";
 import deployedContracts from "../../contracts/deployedContracts";
 import { Address } from "viem";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWatchContractEvent } from "wagmi";
 import { randamu } from "~~/randmu";
 
 interface RouletteBetComponentProps {
@@ -57,22 +57,30 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     }
   }, [allowanceData, amount]);
 
-  if (!betFunctionABI || !approveFunctionABI) {
-    return <div>Required functions are not found in the contract ABI.</div>;
-  }
+  useWatchContractEvent({
+    address: rouletteContractAddress,
+    abi: rouletteContractABI,
+    eventName: "BetConcludes",
+    chainId: randamu.id,
+    onLogs(logs) {
+      console.log("Bet event logs: ", logs);
+    },
+  });
 
+    
   return (
     <div style={{ padding: "20px" }}>
       <div>
-        {needsApproval ? (
+        {(!betFunctionABI || !approveFunctionABI) && <div>Required functions are not found in the contract ABI.</div>}
+        {needsApproval && approveFunctionABI ? (
           <div>
-            <h1>Approve</h1>
             <WriteOnlyFunctionForm
               abi={tokenContractABI}
               abiFunction={approveFunctionABI}
               contractAddress={tokenContractAddress}
               initialFormValues={initialFormValuesApprove}
               hideFunctionInputs={true}
+              buttonText="Approve"
               onChange={() => {
                 console.log("Approval transaction completed.");
                 setNeedsApproval(false);
@@ -81,13 +89,13 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
           </div>
         ) : (
           <div>
-            <h1>Bet</h1>
             <WriteOnlyFunctionForm
               abi={rouletteContractABI}
               abiFunction={betFunctionABI}
               contractAddress={rouletteContractAddress}
               initialFormValues={initialFormValuesBet}
               hideFunctionInputs
+              buttonText="Bet"
               onChange={() => {
                 console.log("Bet transaction completed.");
                 onBetCompleted();

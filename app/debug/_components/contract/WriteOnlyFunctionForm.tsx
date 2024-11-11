@@ -8,7 +8,6 @@ import {
   ContractInput,
   TxReceipt,
   getFunctionInputKey,
-  getInitialFormState,
   getParsedContractFunctionArgs,
   transformAbiFunction,
 } from "~~/app/debug/_components/contract";
@@ -24,6 +23,7 @@ type WriteOnlyFunctionFormProps = {
   inheritedFrom?: string;
   initialFormValues?: Record<string, any>;
   hideFunctionInputs?: boolean;
+  buttonText: string;
 };
 
 export const WriteOnlyFunctionForm = ({
@@ -33,6 +33,7 @@ export const WriteOnlyFunctionForm = ({
   contractAddress,
   initialFormValues,
   hideFunctionInputs,
+  buttonText,
 }: WriteOnlyFunctionFormProps) => {
   const [form, setForm] = useState<Record<string, any>>(() => initialFormValues);
   const [txValue, setTxValue] = useState<string | bigint>("");
@@ -63,13 +64,12 @@ export const WriteOnlyFunctionForm = ({
   };
 
   const [displayedTxResult, setDisplayedTxResult] = useState<TransactionReceipt>();
+
   const { data: txResult } = useWaitForTransactionReceipt({
     hash: result,
   });
 
-  useEffect(() => {
-    setDisplayedTxResult(txResult);
-  }, [txResult]);
+  console.log("txResult", txResult);
 
   // TODO use `useMemo` to optimize also update in ReadOnlyFunctionForm
   const transformedFunction = transformAbiFunction(abiFunction);
@@ -120,10 +120,12 @@ export const WriteOnlyFunctionForm = ({
           >
             <button className="btn btn-secondary" disabled={writeDisabled || isPending} onClick={handleWrite}>
               {isPending && <span className="loading loading-spinner loading-xs"></span>}
-              Send 💸
+              {buttonText}
             </button>
           </div>
         </div>
+
+        {/*displayedTxResult && <TxReceipt txResult={displayedTxResult} />*/}
       </div>
     </div>
   );

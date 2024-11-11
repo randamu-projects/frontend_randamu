@@ -100,6 +100,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
       const message = getParsedError(error);
 
+
       // if receipt was reverted, show notification with block explorer link and return error
       if (transactionReceipt?.status === "reverted") {
         notification.error(<TxnNotification message={message} blockExplorerLink={blockExplorerTxURL} />);
