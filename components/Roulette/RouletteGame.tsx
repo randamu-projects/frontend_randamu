@@ -8,7 +8,10 @@ import RouletteBetComponent from "./RouletteBetFunction";
 import RouletteWheel from "./RouletteWheel";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { motion, useAnimation } from "framer-motion";
+import { unwatchFile } from "fs";
 import { useAccount } from "wagmi";
+import { useWatchContractEvent } from "wagmi";
+import deployedContracts from "~~/contracts/deployedContracts";
 
 const RouletteGame: React.FC = () => {
   const router = useRouter();
@@ -16,6 +19,31 @@ const RouletteGame: React.FC = () => {
   const handleBack = () => {
     router.push("/");
   };
+
+  const rouletteContractInfo = deployedContracts[31337].Roulette;
+  const rouletteContractAddress = rouletteContractInfo.address;
+  const rouletteContractABI = rouletteContractInfo.abi;
+
+  const [betInProgress, setBetInProgress] = useState(false);
+
+  useWatchContractEvent({
+    address: rouletteContractAddress,
+    abi: rouletteContractABI,
+    eventName: "BetConcludes",
+    chainId: 31337,
+    onLogs(logs) {
+      console.log("Bet event logs: ", logs);
+      logs.forEach(log => {
+        const winProb = log.args?.playerWon;
+        if (winProb !== undefined) {
+          if (betInProgress) {
+            spinRoulette(winProb);
+            setBetInProgress(false);
+          }
+        }
+      });
+    },
+  });
 
   const { isConnected } = useAccount();
   const [spinning, setSpinning] = useState(false);
@@ -41,7 +69,7 @@ const RouletteGame: React.FC = () => {
   };
 
   // Spin the roulette and handle result
-  const spinRoulette = async () => {
+  const spinRoulette = async (playerWon: boolean) => {
     if (!isConnected) {
       alert("Please connect your wallet to play.");
       return;
@@ -82,15 +110,12 @@ const RouletteGame: React.FC = () => {
       }
     });
 
-    //! HERE IS THE RESULT OF THE GAME
-    const isWin = Math.random() < winProbability;
-
     // Select a random index based on win or lose
     let resultIndex: number;
-    if (isWin && matchingIndices.length > 0) {
+    if (playerWon && matchingIndices.length > 0) {
       // Player wins
       resultIndex = matchingIndices[Math.floor(Math.random() * matchingIndices.length)];
-    } else if (!isWin && oppositeIndices.length > 0) {
+    } else if (!playerWon && oppositeIndices.length > 0) {
       // Player loses
       resultIndex = oppositeIndices[Math.floor(Math.random() * oppositeIndices.length)];
     } else {
@@ -146,14 +171,19 @@ const RouletteGame: React.FC = () => {
             onChange={e => setBet(e.target.value)}
             style={styles.input}
             placeholder="Min 5"
-            disabled={spinning}
+            disabled={spinning || betInProgress}
           />
         </div>
 
         {/* Select for color */}
         <div style={styles.inputGroup}>
           <label style={styles.label}>Choose Color:</label>
-          <select value={color} onChange={e => setColor(e.target.value)} style={styles.input} disabled={spinning}>
+          <select
+            value={color}
+            onChange={e => setColor(e.target.value)}
+            style={styles.input}
+            disabled={spinning || betInProgress}
+          >
             <option value="red">Red</option>
             <option value="black">Black</option>
           </select>
@@ -186,7 +216,7 @@ const RouletteGame: React.FC = () => {
       <RouletteBetComponent
         amount={(BigInt(bet) * BigInt(10 ** 18)).toString()}
         probability={probability * 100}
-        onBetCompleted={spinRoulette}
+        onBetCompleted={() => setBetInProgress(true)}
       />
 
       {/* Display result only after the wheel stops spinning */}
@@ -204,7 +234,7 @@ const RouletteGame: React.FC = () => {
           cursor: spinning ? "not-allowed" : "pointer",
         }}
         onClick={handleBack}
-        disabled={spinning}
+        disabled={spinning || betInProgress}
       >
         Back to Home
       </button>

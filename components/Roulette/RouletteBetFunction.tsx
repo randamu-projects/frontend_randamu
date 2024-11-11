@@ -32,8 +32,6 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     args: [userAddress || "", rouletteContractAddress],
   });
 
-  console.log("Allowance: ", allowanceData);
-
   const initialFormValuesBet = {
     guessValue: BigInt(probability),
     _amount: amount,
@@ -44,13 +42,9 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     _value: amount,
   };
 
-  console.log("Approve args: ", initialFormValuesApprove);
-  console.log("Bet args: ", initialFormValuesBet);
-  console.log("Numero: ", BigInt(amount));
-
   useEffect(() => {
     const betAmountBigInt = BigInt(amount);
-    if (allowanceData !== undefined && allowanceData < betAmountBigInt) {
+    if (allowanceData !== undefined && allowanceData <= betAmountBigInt) {
       setNeedsApproval(true);
     } else {
       setNeedsApproval(false);
@@ -67,7 +61,6 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
     },
   });
 
-    
   return (
     <div style={{ padding: "20px" }}>
       <div>
@@ -87,7 +80,7 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
               }}
             />
           </div>
-        ) : (
+        ) : betFunctionABI ? (
           <div>
             <WriteOnlyFunctionForm
               abi={rouletteContractABI}
@@ -102,7 +95,7 @@ const RouletteBetComponent: React.FC<RouletteBetComponentProps> = ({ amount, pro
               }}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
