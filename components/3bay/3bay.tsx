@@ -6,54 +6,30 @@ import { CSSProperties } from "react";
 import Image from "next/image";
 import ThreeBayIntegration from "./3bayIntegration";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
 
 // ThreeBayMarket.tsx
 
-// ThreeBayMarket.tsx
 
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
-
-// ThreeBayMarket.tsx
 
 interface NFT {
   id: number;
   name: string;
   image: string;
-  description: string;
-  address?: string;
-  dateMinted?: string;
-  price?: number;
+  address: string;
+}
+
+interface Auction {
+  auctionId: string;
+  nftAddress: string;
+  tokenId: number;
+  seller: string;
+  reservePrice: number;
+  startTimeBlockHeight: number;
+  endTimeBlockHeight: number;
+  counter: number;
+  state: string;
+  highestBidder: string;
+  highestBidAmount: string;
 }
 
 const mockNFTs: NFT[] = [
@@ -61,63 +37,86 @@ const mockNFTs: NFT[] = [
     id: 1,
     name: "NFT Alpha",
     image: "/Nfts/nft1.png",
-    description: "Description of NFT Alpha.",
     address: "0x123...",
-    dateMinted: "2023-01-01",
-    price: 100,
   },
   {
     id: 2,
     name: "NFT Beta",
     image: "/Nfts/nft2.png",
-    description: "Description of NFT Beta.",
     address: "0x456...",
-    dateMinted: "2023-02-01",
-    price: 200,
   },
   {
     id: 3,
     name: "NFT Gamma",
     image: "/Nfts/nft2.png",
-    description: "Description of NFT Gamma.",
     address: "0x789...",
-    dateMinted: "2023-03-01",
-    price: 300,
   },
   // Add more mock NFTs as needed
+];
+
+const mockAuctions: Auction[] = [
+  {
+    auctionId: "1",
+    nftAddress: "0x123...",
+    tokenId: 1,
+    seller: "0xabc...",
+    reservePrice: 10,
+    startTimeBlockHeight: 1,
+    endTimeBlockHeight: 100,
+    counter: 0,
+    state: "Open",
+    highestBidder: "0xdef...",
+    highestBidAmount: "15",
+  },
+  {
+    auctionId: "2",
+    nftAddress: "0x456...",
+    tokenId: 2,
+    seller: "0xabc...",
+    reservePrice: 20,
+    startTimeBlockHeight: 1,
+    endTimeBlockHeight: 100,
+    counter: 0,
+    state: "Open",
+    highestBidder: "0xdef...",
+    highestBidAmount: "25",
+  },
+  // Add more mock auctions as needed
 ];
 
 const ThreeBayMarket: React.FC = () => {
   const [selectedNFTIndex, setSelectedNFTIndex] = useState<number | null>(null);
   const [selectedNFTItem, setSelectedNFTItem] = useState<NFT | null>(null);
+  const [selectedAuctionIndex, setSelectedAuctionIndex] = useState<number | null>(null);
+  const [selectedAuctionItem, setSelectedAuctionItem] = useState<Auction | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedNFTs, setFetchedNFTs] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
-
-  const { address, isConnected } = useAccount();
+  const [toggle, setToggle] = useState(false);
+  const [bidAmount, setBidAmount] = useState("");
 
   const handleNFTClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
-      // NFT is already selected, deselect it
       setSelectedNFTIndex(null);
       setSelectedNFTItem(null);
     } else {
-      // Select this NFT and deselect others
       setSelectedNFTIndex(index);
       setSelectedNFTItem(item);
     }
   };
 
-  console.log(selectedNFTItem?.address);
-  console.log(selectedNFTItem?.id);
-  console.log(selectedNFTItem?.name);
-  console.log(selectedNFTItem?.description);
-  console.log(selectedNFTItem?.dateMinted);
-  console.log(selectedNFTItem?.price);
+  const handleAuctionClick = (auction: Auction, index: number) => {
+    if (selectedAuctionIndex === index) {
+      setSelectedAuctionIndex(null);
+      setSelectedAuctionItem(null);
+    } else {
+      setSelectedAuctionIndex(index);
+      setSelectedAuctionItem(auction);
+    }
+  };
 
   const handleNFTDoubleClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
-      // Open the modal
       setShowModal(true);
     }
   };
@@ -130,45 +129,22 @@ const ThreeBayMarket: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
+  const handleToggleButton = () => {
+    setToggle(!toggle);
+    setSelectedAuctionIndex(null);
+    setSelectedAuctionItem(null);
+    setBidAmount("");
+  };
+
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // The getNft function
-  async function getNft(address: string) {
-    if (isConnected) {
-      const apiUrl = `https://blockscout.firepit.network/api/v2/addresses/${address}/nft?type=ERC-721`;
-
-      try {
-        const response = await fetch(apiUrl, { mode: "no-cors" });
-
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        const data = await response.json();
-        // Update the state with the fetched data
-        setFetchedNFTs(data);
-      } catch (error) {
-        console.error("Error:", error);
-        // Optionally, handle the error state
-        setFetchedNFTs(null);
-      }
-    } else {
-      // If not connected, you might want to show a message or handle accordingly
-      console.log("Wallet not connected");
-    }
-  }
-
-  // Handler for the button click
+  // Handler for the button click (Mock function for fetching NFTs)
   const handleFetchNfts = () => {
-    if (address) {
-      getNft(address);
-    } else {
-      console.log("No address found");
-    }
+    // Mock fetching NFTs
+    console.log("Fetching NFTs...");
+    setFetchedNFTs({ items: mockNFTs });
   };
-
-  console.log("Address:", address);
 
   return (
     <div style={styles.marketContainer}>
@@ -184,63 +160,108 @@ const ThreeBayMarket: React.FC = () => {
         style={styles.searchBar}
         className="search-input"
       />
-
-      {/* Display the fetched NFTs */}
-      {fetchedNFTs ? (
-        <div style={styles.fetchedNftsContainer}>
-          <h2>My NFTs:</h2>
-          <div style={styles.gridContainer}>
-            {fetchedNFTs.items.map((item: any, index: number) => (
-              <div
-                key={index}
-                style={{
-                  ...styles.nftCase,
-                  ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
-                }}
-                onClick={() => handleNFTClick(item, index)}
-                onDoubleClick={() => handleNFTDoubleClick(item, index)}
-              >
-                {item.token_instances[0]?.image_url && (
-                  <img src={item.token_instances[0].image_url} alt={item.token.name} style={styles.nftImage} />
-                )}
-                <h3>{item.token.name}</h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        // If no NFTs are fetched, display mock NFTs
-        <div style={styles.gridContainer}>
-          {filteredNFTs.map((nft, index) => (
-            <div
-              key={nft.id}
-              style={{
-                ...styles.nftCase,
-                ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
-              }}
-              onClick={() => handleNFTClick(nft, index)}
-              onDoubleClick={() => handleNFTDoubleClick(nft, index)}
-            >
-              <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {selectedNFTItem && (
-        <button style={styles.closeButton} onClick={() => setShowModal(true)}>
-          Show info
-        </button>
-      )}
-
-      {/* Create Auction Button */}
-      {/* Render ThreeBayIntegration when Create Auction is clicked */}
-      {selectedNFTItem && <ThreeBayIntegration selectedNFT={selectedNFTItem} />}
-
-      {/* Add the button to fetch NFTs */}
       <button style={styles.fetchButton} onClick={handleFetchNfts}>
         Refresh
       </button>
+      <button style={styles.fetchButton} onClick={handleToggleButton}>
+        {toggle ? "Switch to Search Mode" : "Switch to Auction Mode"}
+      </button>
+
+      {toggle ? (
+        // Auction mode: display auction list
+        <div style={styles.auctionListContainer}>
+          <h2>Auctions:</h2>
+          <div style={styles.scrollList}>
+            {mockAuctions.map((auction, index) => (
+              <div
+                key={index}
+                style={{
+                  ...styles.auctionItem,
+                  ...(selectedAuctionIndex === index ? styles.selectedAuctionItem : {}),
+                }}
+                onClick={() => handleAuctionClick(auction, index)}
+              >
+                <p>NFT Address: {auction.nftAddress}</p>
+                <p>Token ID: {auction.tokenId}</p>
+                <p>Seller: {auction.seller}</p>
+                <p>Reserve Price: {auction.reservePrice}</p>
+                <p>Highest Bid: {auction.highestBidAmount}</p>
+                {/* Add more auction details as needed */}
+              </div>
+            ))}
+          </div>
+          {selectedAuctionItem && (
+            <div>
+              <input
+                type="number"
+                placeholder="Enter your bid amount"
+                value={bidAmount}
+                onChange={e => setBidAmount(e.target.value)}
+                style={styles.inputField}
+              />
+              <button style={styles.bidButton} onClick={() => console.log("Bid placed")}>
+                Bid
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        // Search mode: display NFTs and allow to create auction
+        <>
+          {fetchedNFTs ? (
+            <div style={styles.fetchedNftsContainer}>
+              <h2>My NFTs:</h2>
+              <div style={styles.gridContainer}>
+                {fetchedNFTs.items.map((item: any, index: number) => (
+                  <div
+                    key={index}
+                    style={{
+                      ...styles.nftCase,
+                      ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
+                    }}
+                    onClick={() => handleNFTClick(item, index)}
+                    onDoubleClick={() => handleNFTDoubleClick(item, index)}
+                  >
+                    {item.image && <img src={item.image} alt={item.name} style={styles.nftImage} />}
+                    <h3>{item.name}</h3>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // If no NFTs are fetched, display mock NFTs
+            <div style={styles.gridContainer}>
+              {filteredNFTs.map((nft, index) => (
+                <div
+                  key={nft.id}
+                  style={{
+                    ...styles.nftCase,
+                    ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
+                  }}
+                  onClick={() => handleNFTClick(nft, index)}
+                  onDoubleClick={() => handleNFTDoubleClick(nft, index)}
+                >
+                  <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
+                </div>
+              ))}
+            </div>
+          )}
+          {selectedNFTItem && (
+            <div>
+              <button style={styles.closeButton} onClick={() => setShowModal(true)}>
+                Show info
+              </button>
+              {/* Display description and allow to create auction */}
+              <div style={styles.nftDescription}>
+                <h2>{selectedNFTItem.name}</h2>
+                <p>Address: {selectedNFTItem.address}</p>
+                {/* Add more NFT details as needed */}
+              </div>
+              <ThreeBayIntegration selectedNFT={selectedNFTItem} />
+            </div>
+          )}
+        </>
+      )}
 
       {showModal && selectedNFTItem && (
         <div style={styles.modalOverlay} onClick={handleCloseModal}>
@@ -253,9 +274,7 @@ const ThreeBayMarket: React.FC = () => {
                   )}
                   <div style={styles.modalInfo}>
                     <h2>{selectedNFTItem.name}</h2>
-                    <p>{selectedNFTItem.description}</p>
                     <p>Address: {selectedNFTItem.address}</p>
-                    <p>Date Minted: {selectedNFTItem.dateMinted}</p>
                     {/* Add more info as needed */}
                   </div>
                 </>
@@ -342,7 +361,7 @@ const styles: { [key: string]: CSSProperties } = {
     maxHeight: "100%",
   },
   fetchButton: {
-    marginTop: "20px",
+    marginTop: "10px",
     padding: "10px 20px",
     backgroundColor: "#0070f3",
     border: "none",
@@ -350,6 +369,7 @@ const styles: { [key: string]: CSSProperties } = {
     color: "#ffffff",
     cursor: "pointer",
     fontSize: "16px",
+    marginRight: "10px",
   },
   createAuctionButton: {
     marginTop: "10px",
@@ -416,5 +436,51 @@ const styles: { [key: string]: CSSProperties } = {
     borderRadius: "5px",
     cursor: "pointer",
     fontSize: "16px",
+  },
+  auctionListContainer: {
+    borderRadius: "8px",
+    backgroundColor: "darkcyan",
+    marginTop: "20px",
+    width: "80%",
+    maxWidth: "800px",
+    textAlign: "center" as const,
+  },
+  scrollList: {
+    maxHeight: "400px",
+    overflowY: "scroll",
+    border: "1px solid #ccc",
+    padding: "10px",
+  },
+  auctionItem: {
+    padding: "10px",
+    borderBottom: "1px solid #ccc",
+    cursor: "pointer",
+    textAlign: "left" as const,
+  },
+  selectedAuctionItem: {
+    backgroundColor: "black",
+  },
+  inputField: {
+    width: "80%",
+    maxWidth: "300px",
+    padding: "10px",
+    marginTop: "10px",
+    fontSize: "16px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+  },
+  bidButton: {
+    marginTop: "10px",
+    padding: "10px 20px",
+    backgroundColor: "#28a745",
+    border: "none",
+    borderRadius: "5px",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  nftDescription: {
+    marginTop: "10px",
+    textAlign: "center" as const,
   },
 };

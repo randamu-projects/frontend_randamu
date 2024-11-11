@@ -3,26 +3,9 @@
 
 import React from "react";
 import deployedContracts from "../../contracts/deployedContracts";
-import { log } from "console";
 import { Address } from "viem";
 import { useAccount, useWatchContractEvent } from "wagmi";
 import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
-
-// 3bayIntegration.tsx
 
 // 3bayIntegration.tsx
 

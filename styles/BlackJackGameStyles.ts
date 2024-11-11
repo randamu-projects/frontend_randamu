@@ -57,7 +57,7 @@ export const styles: { [key: string]: React.CSSProperties } = {
     marginRight: "10px",
   },
   betInput: {
-    width: "100px",
+    width: "200px",
     padding: "8px",
     fontSize: "16px",
     borderRadius: "5px",
@@ -66,6 +66,7 @@ export const styles: { [key: string]: React.CSSProperties } = {
     color: "#ffffff",
     textAlign: "center",
     marginTop: "10px",
+    marginRight: "10px",
   },
   startButton: {
     marginTop: "20px",

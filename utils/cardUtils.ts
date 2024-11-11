@@ -14,11 +14,18 @@ export const createDeck = () => {
   return deck.sort(() => Math.random() - 0.5); // Shuffle the deck
 };
 
-// Function to get the numeric value of a card
-export const getCardValue = (card: { value: string }) => {
-  if (["J", "Q", "K"].includes(card.value)) return 10;
-  if (card.value === "A") return 11; // Ace can be 11 (or 1, but logic to adjust is separate)
-  return parseInt(card.value);
+export const getCardValue = (card: Card | undefined): number => {
+  if (!card) {
+    return 0; // Or throw an error if this should never happen
+  }
+  const faceCards = ["J", "Q", "K"];
+  if (faceCards.includes(card.value)) {
+    return 10;
+  } else if (card.value === "A") {
+    return 11;
+  } else {
+    return parseInt(card.value, 10);
+  }
 };
 
 // Function to calculate the total value of a hand
