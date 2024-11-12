@@ -19,6 +19,20 @@ export const styles: { [key: string]: React.CSSProperties } = {
     left: "20px",
     zIndex: 1000, // Ensures the button stays on top
   },
+  actionButton: {
+    marginTop: "20px",
+    padding: "12px 24px",
+    fontSize: "18px",
+    cursor: "pointer",
+    border: "none",
+    borderRadius: "8px",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    transition: "background-color 0.3s",
+    margin: "10px",
+  },
+
   header: {
     fontSize: "48px",
     fontWeight: "bold",
