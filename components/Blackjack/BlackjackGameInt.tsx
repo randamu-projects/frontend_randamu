@@ -10,15 +10,6 @@ import { WriteOnlyFunctionForm } from "~~/app/debug/_components/contract";
 import { randamu } from "~~/randmu";
 import { styles } from "~~/styles/BlackJackGameStyles";
 
-
-
-
-// BlackjackGameInt.tsx
-
-// BlackjackGameInt.tsx
-
-// BlackjackGameInt.tsx
-
 // BlackjackGameInt.tsx
 
 type BlackjackGameIntProps = {

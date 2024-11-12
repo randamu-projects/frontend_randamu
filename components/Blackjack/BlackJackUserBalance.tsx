@@ -38,13 +38,17 @@ const BlackJackUserBalance: React.FC<BlackJackUserBalanceProps> = ({ userAddress
   const formatBalance = (balance: bigint | undefined): string => {
     if (balance === undefined) return "0";
     // Assuming the token has 18 decimals
-    return formatUnits(balance, 18);
+    return formatUnits(balance, 18).slice(0, -16);
   };
 
   return (
-    <div style={styles.container}>
-      <h2>User Token Balance</h2>
-      Balance: <strong>{formatBalance(balanceData)}</strong>
+    <div className="card bg-gradient-to-r from-green-400 to-blue-500 text-neutral-content shadow-xl px-12 py-6 rounded-lg">
+      <div className="card-body text-center">
+        <h2 className="card-title text-2xl font-bold">Your Fake Money</h2>
+        <p className="text-4xl font-semibold mt-4">
+          Balance: <span className="text-white">{formatBalance(balanceData)}</span> FM
+        </p>
+      </div>
     </div>
   );
 };

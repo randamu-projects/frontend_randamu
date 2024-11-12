@@ -94,7 +94,7 @@ const BlackjackGame: React.FC = () => {
       <h1 style={styles.header}>Blackjack</h1>
 
       <div style={styles.balanceContainer}>
-        <h2 style={styles.balanceText}>Your Balance: ${<BlackJackUserBalance userAddress={userAddress || ""} />}</h2>
+        <h2 style={styles.balanceText}>{<BlackJackUserBalance userAddress={userAddress || ""} />}</h2>
 
         {/* Nonce Input and Load Game Button */}
         <div style={styles.nonceContainer}>
@@ -120,9 +120,10 @@ const BlackjackGame: React.FC = () => {
 
         {!gameOver && (
           <div style={styles.betContainer}>
-            <label htmlFor="bet" style={styles.betLabel}>
-              Place Your Bet:
-            </label>
+          <label htmlFor="bet" style={styles.betLabel}>
+            Place Your Bet:
+          </label>
+          <div style={styles.inputWrapper}>
             <input
               id="bet"
               type="text"
@@ -131,7 +132,9 @@ const BlackjackGame: React.FC = () => {
               style={styles.betInput}
               placeholder="Enter Bet Amount"
             />
+            <span style={styles.unitLabel}>ETH</span>
           </div>
+        </div>                            
         )}
       </div>
 
