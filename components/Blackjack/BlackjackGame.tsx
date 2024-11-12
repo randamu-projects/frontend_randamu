@@ -7,8 +7,9 @@ import { styles } from "../../styles/BlackJackGameStyles";
 import BlackJackUserBalance from "./BlackJackUserBalance";
 import BlackjackGameInt from "./BlackjackGameInt";
 import BlackJackGetHand from "./BlackjackGetCards";
+import BlackjackGameComponent from "./BlackjackGameComponent";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useWatchContractEvent } from "wagmi";
+import { useAccount, useWatchContractEvent, useReadContract } from "wagmi";
 import deployedContracts from "~~/contracts/deployedContracts";
 
 // BlackjackGame.tsx
@@ -95,30 +96,10 @@ const BlackjackGame: React.FC = () => {
 
       <div style={styles.balanceContainer}>
         <h2 style={styles.balanceText}>{<BlackJackUserBalance userAddress={userAddress || ""} />}</h2>
-
-        {/* Nonce Input and Load Game Button */}
-        <div style={styles.nonceContainer}>
-          <label htmlFor="nonce" style={styles.betLabel}>
-            Game ID (Nonce):
-          </label>
-          <input
-            id="nonce"
-            type="text"
-            value={nonceInputValue}
-            onChange={e => setNonceInputValue(e.target.value)}
-            style={styles.betInput}
-            placeholder="Enter Nonce"
-          />
-          <button onClick={applyNonceChange} style={styles.backButton}>
-            Load Game
-          </button>
-        </div>
-
-        <div>
-          <h3 style={styles.playerTotalText}>Bet: {bet}</h3>
-        </div>
+        <h2 style={styles.balanceText}>{<BlackjackGameComponent userAddress={userAddress || ""} />}</h2>
 
         {!gameOver && (
+          
           <div style={styles.betContainer}>
           <label htmlFor="bet" style={styles.betLabel}>
             Place Your Bet:
@@ -132,7 +113,7 @@ const BlackjackGame: React.FC = () => {
               style={styles.betInput}
               placeholder="Enter Bet Amount"
             />
-            <span style={styles.unitLabel}>ETH</span>
+            <span style={styles.unitLabel}>FM</span>
           </div>
         </div>                            
         )}
