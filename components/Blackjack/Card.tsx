@@ -1,4 +1,11 @@
+// Card.tsx
+"use client";
+
 import React from "react";
+
+// Card.tsx
+
+// Card.tsx
 
 interface CardProps {
   value: string;
@@ -9,7 +16,6 @@ const Card: React.FC<CardProps> = ({ value, suit }) => {
   // If value is 'back', display the face-down card image
   if (value === "back") {
     const backPath = `/cards/back.svg`;
-
     return <img src={backPath} alt="Card back" style={styles.cardImage} />;
   }
 
@@ -22,7 +28,7 @@ const Card: React.FC<CardProps> = ({ value, suit }) => {
 
 const styles = {
   cardImage: {
-    width: "100px", // You can adjust the size of the cards
+    width: "100px", // Adjust the size of the cards as needed
     height: "150px",
     margin: "5px",
     border: "1px solid black",
