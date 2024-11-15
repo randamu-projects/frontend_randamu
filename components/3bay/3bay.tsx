@@ -164,7 +164,7 @@ const ThreeBayMarket: React.FC = () => {
         Refresh
       </button>
       <button style={styles.fetchButton} onClick={handleToggleButton}>
-        {toggle ? "Switch to Auction Mode" : "Switch to Search Mode"}
+        {toggle ? "Bid on NFTs" : "Create an auction"}
       </button>
 
       {toggle ? (
