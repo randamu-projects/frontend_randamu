@@ -94,6 +94,9 @@ const ThreeBayMarket: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [toggle, setToggle] = useState(false);
   const [bidAmount, setBidAmount] = useState("");
+  const [reservePrice, setReservePrice] = useState("");
+  const [auctionStartDate, setAuctionStartDate] = useState("");
+  const [auctionDuration] = useState("");
 
   const handleNFTClick = (item: any, index: number) => {
     if (selectedNFTIndex === index) {
@@ -136,6 +139,13 @@ const ThreeBayMarket: React.FC = () => {
     setBidAmount("");
   };
 
+  const handleCreateAuction = () => {
+    console.log("Creating auction...");
+    console.log("Auction start date:", auctionStartDate);
+    console.log("Reserve price:", reservePrice);
+    // Add more auction details as needed
+  };
+
   // Optionally, filter NFTs based on searchQuery
   const filteredNFTs = mockNFTs.filter(nft => nft.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -160,12 +170,22 @@ const ThreeBayMarket: React.FC = () => {
         style={styles.searchBar}
         className="search-input"
       />
-      <button style={styles.fetchButton} onClick={handleFetchNfts}>
-        Refresh
-      </button>
-      <button style={styles.fetchButton} onClick={handleToggleButton}>
-        {toggle ? "Bid on NFTs" : "Create an auction"}
-      </button>
+      
+      <div className="flex space-x-4">
+        {/* Refresh Button */}
+        <button className="btn btn-primary" onClick={handleFetchNfts}>
+          Refresh
+        </button>
+
+        {/* Toggle Button */}
+        <button 
+          className={`btn ${toggle ? "btn-success" : "btn-info"}`} 
+          onClick={handleToggleButton}
+        >
+          {toggle ? "Create an Auction" : "Bid on NFTs"}
+        </button>
+      </div>
+
 
       {toggle ? (
         // Auction mode: display auction list
@@ -209,43 +229,100 @@ const ThreeBayMarket: React.FC = () => {
         // Search mode: display NFTs and allow to create auction
         <>
           {fetchedNFTs ? (
-            <div style={styles.fetchedNftsContainer}>
-              <h2>My NFTs:</h2>
-              <div style={styles.gridContainer}>
-                {fetchedNFTs.items.map((item: any, index: number) => (
-                  <div
-                    key={index}
-                    style={{
-                      ...styles.nftCase,
-                      ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
-                    }}
-                    onClick={() => handleNFTClick(item, index)}
-                    onDoubleClick={() => handleNFTDoubleClick(item, index)}
-                  >
-                    {item.image && <img src={item.image} alt={item.name} style={styles.nftImage} />}
-                    <h3>{item.name}</h3>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            // If no NFTs are fetched, display mock NFTs
+          <div style={styles.fetchedNftsContainer}>
+            <h2>My NFTs:</h2>
             <div style={styles.gridContainer}>
-              {filteredNFTs.map((nft, index) => (
+              {fetchedNFTs.items.map((item: any, index: number) => (
                 <div
-                  key={nft.id}
+                  key={index}
                   style={{
                     ...styles.nftCase,
                     ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
                   }}
-                  onClick={() => handleNFTClick(nft, index)}
-                  onDoubleClick={() => handleNFTDoubleClick(nft, index)}
+                  onClick={() => handleNFTClick(item, index)}
+                  onDoubleClick={() => handleNFTDoubleClick(item, index)}
                 >
-                  <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
+                  {item.image && <img src={item.image} alt={item.name} style={styles.nftImage} />}
+                  <h3>{item.name}</h3>
                 </div>
               ))}
             </div>
-          )}
+
+            {/* Auction Details Form */}
+            <div className="p-4 bg-white shadow rounded-lg w-80 ml-8">
+              <h3 className="text-lg font-semibold mb-4">Auction Details</h3>
+
+              {/* Auction Start Date */}
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Auction Start Date:</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  className="input input-bordered"
+                  value={auctionStartDate}
+                  onChange={(e) => setAuctionStartDate(e.target.value)}
+                />
+              </div>
+
+              {/* Auction Duration */}
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Auction Duration (hours):</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered"
+                  value={auctionDuration}
+                  onChange={(e) => {
+                    //TODO:
+                    // setAuctionDuration(e.target.value);
+                    // calculateEndDate(e.target.value); // Function to calculate the end date
+                  }}
+                  placeholder="Enter duration in hours"
+                />
+              </div>
+
+              {/* Reserve Price */}
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Reserve Price:</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered"
+                  value={reservePrice}
+                  onChange={(e) => 
+                    setReservePrice(e.target.value)
+                  }
+                  placeholder="Enter reserve price"
+                />
+              </div>
+
+              <button className="btn btn-primary w-full" onClick={handleCreateAuction}>
+                Create Auction
+              </button>
+            </div>
+          </div>
+        ) : (
+          // If no NFTs are fetched, display mock NFTs
+          <div style={styles.gridContainer}>
+            {filteredNFTs.map((nft, index) => (
+              <div
+                key={nft.id}
+                style={{
+                  ...styles.nftCase,
+                  ...(selectedNFTIndex === index ? styles.selectedNftCase : {}),
+                }}
+                onClick={() => handleNFTClick(nft, index)}
+                onDoubleClick={() => handleNFTDoubleClick(nft, index)}
+              >
+                <Image src={nft.image} alt={nft.name} style={styles.nftImage} width={500} height={500} />
+              </div>
+            ))}
+          </div>
+        )}
+
           {selectedNFTItem && (
             <div>
               <button style={styles.closeButton} onClick={() => setShowModal(true)}>
